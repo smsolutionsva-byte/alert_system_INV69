@@ -80,8 +80,13 @@ export function useAlerts() {
   }, [])
 
   useEffect(() => {
+    if (telemetry && typeof telemetry.isDeviceOnline === 'boolean') {
+      setConnected(telemetry.isDeviceOnline)
+      return
+    }
+
     setConnected(alertStreamOnline || telemetryStreamOnline)
-  }, [alertStreamOnline, telemetryStreamOnline])
+  }, [alertStreamOnline, telemetry, telemetryStreamOnline])
 
   const heartbeatSeries = useMemo<HeartbeatPoint[]>(() => {
     if (telemetryHistory.length > 0) {

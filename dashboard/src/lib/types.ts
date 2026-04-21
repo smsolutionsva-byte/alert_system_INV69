@@ -25,5 +25,8 @@ export interface LiveTelemetry {
   source: 'pi-hardware' | 'remote-simulator'
   heartbeatBpm: number
   soundDb: number
+  isDeviceOnline?: boolean
+  isHeartSensorEnabled?: boolean
+  isSoundSensorEnabled?: boolean
   isEmergencyMode: boolean
 }
