@@ -22,7 +22,7 @@ export interface LiveTelemetry {
   updatedAt: number
   updatedAtIso: string
   deviceId: string
-  source: 'pi-hardware' | 'remote-simulator'
+  source: 'pi-hardware' | 'manual-panel'
   heartbeatBpm: number
   soundDb: number
   isDeviceOnline?: boolean

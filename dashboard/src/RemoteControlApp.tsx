@@ -3,7 +3,7 @@ import { addDoc, collection, doc, setDoc } from 'firebase/firestore'
 import { BellRing, HeartPulse, Mic, Wifi, WifiOff } from 'lucide-react'
 import { db } from '@/lib/firebase'
 
-const DEVICE_ID = 'remote-controller-01'
+const DEVICE_ID = 'pi-zero-2w-01'
 
 // Reference anchors:
 // - Resting heart rate for adults is commonly 60-100 bpm (AHA).
@@ -52,9 +52,9 @@ export function RemoteControlApp() {
 
   const connectionHint = useMemo(() => {
     if (sendError) {
-      return 'Write failed. Check Firestore rules for remote writes.'
+      return 'Write failed. Check Firestore rules for controller writes.'
     }
-    return 'Live writes are enabled to Firestore telemetry/live.'
+    return 'Live sensor writes are enabled to Firestore telemetry/live.'
   }, [sendError])
 
   async function pushAlert(alertType: 'manual' | 'sound' | 'heartbeat' | 'multi_sensor', message: string): Promise<void> {
@@ -63,7 +63,7 @@ export function RemoteControlApp() {
       createdAt: now,
       createdAtIso: new Date(now).toISOString(),
       deviceId: DEVICE_ID,
-      source: 'remote-simulator',
+      source: 'manual-panel',
       alertType,
       message,
       complaintStatus: 'new',
@@ -80,7 +80,7 @@ export function RemoteControlApp() {
         updatedAt: now,
         updatedAtIso: new Date(now).toISOString(),
         deviceId: DEVICE_ID,
-        source: 'remote-simulator',
+        source: 'manual-panel',
         heartbeatBpm: Math.round(nextHeartbeat),
         soundDb: Math.round(nextSound),
         isDeviceOnline,
@@ -132,7 +132,7 @@ export function RemoteControlApp() {
     const baseline = randomBetween(RESTING_HEART_MIN, RESTING_HEART_MAX)
     setHeartbeatBpm(baseline)
     heartbeatRef.current = baseline
-    setStatusMessage('Heart sensor ON. Resting heartbeat simulation started.')
+    setStatusMessage('Heart sensor ON. Resting heartbeat monitoring started.')
   }
 
   function handleSoundSensorToggle(): void {
@@ -152,7 +152,7 @@ export function RemoteControlApp() {
     const ambient = randomBetween(AMBIENT_DB_MIN, AMBIENT_DB_MAX)
     setSoundDb(ambient)
     soundRef.current = ambient
-    setStatusMessage('Sound sensor ON. Ambient low dB simulation started.')
+    setStatusMessage('Sound sensor ON. Ambient sound baseline started.')
   }
 
   function handleEmergencyToggle(): void {
@@ -167,7 +167,7 @@ export function RemoteControlApp() {
 
     if (next) {
       setHeartBoost((prev) => Math.min(prev + 16, 52))
-      void pushAlert('manual', 'Emergency mode activated from remote controller.').catch((error: unknown) => {
+      void pushAlert('manual', 'Emergency alert triggered from push button.').catch((error: unknown) => {
         setSendError(String(error))
       })
       setStatusMessage('Emergency mode ON. Alert pushed.')
@@ -281,14 +281,14 @@ export function RemoteControlApp() {
 
       if (heartSensorEnabled && nextHeartbeat >= 116 && now - lastHeartbeatAlertAt.current > 25000) {
         lastHeartbeatAlertAt.current = now
-        void pushAlert('heartbeat', 'Elevated heartbeat pattern observed.').catch((error: unknown) => {
+        void pushAlert('heartbeat', 'Abnormal heartbeat detected from heartbeat sensor.').catch((error: unknown) => {
           setSendError(String(error))
         })
       }
 
       if (soundSensorEnabled && soundHeld && nextSound >= 72 && now - lastSoundAlertAt.current > 18000) {
         lastSoundAlertAt.current = now
-        void pushAlert('sound', 'High-risk sound intensity detected.').catch((error: unknown) => {
+        void pushAlert('sound', 'High sound intensity detected from sound sensor.').catch((error: unknown) => {
           setSendError(String(error))
         })
       }
@@ -334,9 +334,9 @@ export function RemoteControlApp() {
   return (
     <main className="mx-auto min-h-screen w-full max-w-3xl px-4 py-6 text-slate-100 sm:px-6">
       <section className="rounded-2xl border border-cyan-500/25 bg-[#071935]/85 p-5 shadow-[0_24px_60px_rgba(1,8,24,0.75)] backdrop-blur">
-        <h1 className="text-2xl font-semibold text-cyan-300 sm:text-3xl">INV69 Remote Sensor Control</h1>
+        <h1 className="text-2xl font-semibold text-cyan-300 sm:text-3xl">INV69 Sensor Control Panel</h1>
         <p className="mt-2 text-sm text-slate-300">
-          Open this page from mobile to simulate Raspberry Pi sensor values remotely.
+          Open this page from mobile to generate push button and sensor events.
         </p>
 
         <div className="mt-4 grid gap-3 rounded-xl border border-cyan-500/20 bg-[#0b2148] p-4 sm:grid-cols-2">
