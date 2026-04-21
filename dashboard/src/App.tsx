@@ -1,7 +1,6 @@
-import { Activity, AudioLines, Shield, Siren, Wifi } from 'lucide-react'
+import { AudioLines, FileText, HeartPulse, Radar, Siren, WifiOff } from 'lucide-react'
 import { AlertsTable } from '@/components/alerts-table'
 import { HeartbeatChart } from '@/components/heartbeat-chart'
-import { StatusPill } from '@/components/status-pill'
 import { Card, CardContent } from '@/components/ui/card'
 import { useAlerts } from '@/lib/useAlerts'
 
@@ -9,97 +8,108 @@ function App() {
   const { alerts, heartbeatSeries, connected } = useAlerts()
 
   const latest = alerts[0]
-  const hasActiveAlert = alerts.some((item) => item.complaintStatus !== 'closed')
   const latestBpm = heartbeatSeries[heartbeatSeries.length - 1]?.bpm ?? 0
   const latestSound = latest?.soundLevel ?? 0
+  const openComplaints = alerts.filter((item) => item.complaintStatus !== 'closed').length
 
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
-      <section className="rounded-3xl border border-white/60 bg-white/70 p-6 shadow-xl shadow-slate-300/30 backdrop-blur-lg sm:p-8">
-        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+    <main className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8">
+      <section className="rounded-2xl border border-cyan-500/20 bg-[#051733]/70 p-5 shadow-[0_24px_70px_rgba(0,8,28,0.7)] backdrop-blur-xl sm:p-6">
+        <div className="flex items-start gap-3">
+          <HeartPulse className="mt-1 size-8 text-cyan-400" />
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.22em] text-rose-700">IoT Safety Network</p>
-            <h1 className="mt-3 text-3xl font-bold leading-tight text-slate-900 sm:text-4xl">
-              Domestic Violence Alert and Complaint Tracking Dashboard
-            </h1>
-            <p className="mt-3 max-w-3xl text-slate-600">
-              This console monitors emergency button events, abnormal sound patterns, and heartbeat spikes from field devices in real time.
-            </p>
+            <h1 className="text-3xl font-bold tracking-tight text-cyan-300 sm:text-5xl">IoT Safety Network</h1>
+            <p className="mt-1 text-lg text-slate-100 sm:text-[34px]">Domestic Violence Alert and Complaint Tracking Dashboard</p>
           </div>
-          <StatusPill active={hasActiveAlert} />
         </div>
 
-        <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className="rounded-2xl border border-slate-200/70 bg-white/85 py-0">
-            <CardContent className="p-4">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-sm">Connection</span>
-              <Wifi className="size-4" />
-            </div>
-            <p className="mt-2 text-xl font-semibold text-slate-900">{connected ? 'Live' : 'Offline'}</p>
+        <div className="mt-4 rounded-lg border-l-4 border-cyan-400 bg-[#0a1b3f]/90 px-4 py-3 text-[17px] text-slate-300">
+          Real-time monitoring of emergency buttons, abnormal sound patterns, and heartbeat spikes from field devices.
+        </div>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <Card className="rounded-xl border border-sky-500/20 bg-[#081a3b] py-0 shadow-md shadow-black/30">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <p className="text-sm uppercase tracking-wider text-slate-400">Connection Status</p>
+                <WifiOff className="size-8 text-rose-400" />
+              </div>
+              <p className="mt-2 text-4xl font-semibold text-rose-400">{connected ? 'Online' : 'Offline'}</p>
+              <p className="mt-2 flex items-center gap-2 text-base text-rose-300">
+                <span className="size-2 rounded-full bg-rose-400" />
+                {connected ? 'Connected to Firebase' : 'Awaiting Connection'}
+              </p>
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border border-slate-200/70 bg-white/85 py-0">
-            <CardContent className="p-4">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-sm">Current Heartbeat</span>
-              <Activity className="size-4" />
-            </div>
-            <p className="mt-2 text-xl font-semibold text-slate-900">{latestBpm} bpm</p>
+          <Card className="rounded-xl border border-sky-500/20 bg-[#081a3b] py-0 shadow-md shadow-black/30">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <p className="text-sm uppercase tracking-wider text-slate-400">Current Heartbeat</p>
+                <HeartPulse className="size-8 text-emerald-400" />
+              </div>
+              <p className="mt-2 text-4xl font-semibold text-emerald-400">{latestBpm} bpm</p>
+              <p className="mt-2 flex items-center gap-2 text-base text-emerald-300">
+                <span className="size-2 rounded-full bg-emerald-400" />
+                Normal Range
+              </p>
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border border-slate-200/70 bg-white/85 py-0">
-            <CardContent className="p-4">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-sm">Sound Level</span>
-              <AudioLines className="size-4" />
-            </div>
-            <p className="mt-2 text-xl font-semibold text-slate-900">{latestSound}</p>
+          <Card className="rounded-xl border border-sky-500/20 bg-[#081a3b] py-0 shadow-md shadow-black/30">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <p className="text-sm uppercase tracking-wider text-slate-400">Sound Level</p>
+                <AudioLines className="size-8 text-cyan-300" />
+              </div>
+              <p className="mt-2 text-4xl font-semibold text-cyan-300">{latestSound} dB</p>
             </CardContent>
           </Card>
 
-          <Card className="rounded-2xl border border-slate-200/70 bg-white/85 py-0">
-            <CardContent className="p-4">
-            <div className="flex items-center justify-between text-slate-500">
-              <span className="text-sm">Open Complaints</span>
-              <Shield className="size-4" />
-            </div>
-            <p className="mt-2 text-xl font-semibold text-slate-900">
-              {alerts.filter((item) => item.complaintStatus !== 'closed').length}
-            </p>
+          <Card className="rounded-xl border border-sky-500/20 bg-[#081a3b] py-0 shadow-md shadow-black/30">
+            <CardContent className="p-5">
+              <div className="flex items-start justify-between">
+                <p className="text-sm uppercase tracking-wider text-slate-400">Open Complaints</p>
+                <FileText className="size-8 text-sky-400" />
+              </div>
+              <p className="mt-2 text-4xl font-semibold text-sky-400">{openComplaints}</p>
             </CardContent>
           </Card>
         </div>
       </section>
 
-      <section className="mt-8 grid gap-6 lg:grid-cols-[1.4fr,1fr]">
+      <section className="mt-6 grid gap-6 lg:grid-cols-[1.6fr,0.8fr]">
         <HeartbeatChart points={heartbeatSeries} />
 
-        <aside className="rounded-2xl border border-white/50 bg-white/85 p-6 shadow-sm backdrop-blur">
-          <h2 className="text-xl font-semibold tracking-tight text-slate-900">Latest Alert</h2>
+        <aside className="rounded-xl border border-sky-500/20 bg-[#081a3b] p-6 shadow-md shadow-black/30">
+          <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-cyan-300 sm:text-4xl">
+            <Radar className="size-6" />
+            Latest Alert
+          </h2>
           {latest ? (
-            <div className="mt-4 space-y-3 text-sm text-slate-700">
-              <div className="flex items-center gap-2 text-rose-600">
+            <div className="mt-6 space-y-3 text-base text-slate-300">
+              <div className="flex items-center gap-2 text-rose-300">
                 <Siren className="size-4" />
                 <span className="font-medium uppercase tracking-wide">{latest.alertType}</span>
               </div>
               <p>{latest.message}</p>
               <p>
-                Device: <span className="font-medium text-slate-900">{latest.deviceId}</span>
+                Device: <span className="font-medium text-slate-100">{latest.deviceId}</span>
               </p>
               <p>
-                Status: <span className="font-medium text-slate-900">{latest.complaintStatus}</span>
+                Status: <span className="font-medium text-slate-100">{latest.complaintStatus}</span>
               </p>
             </div>
           ) : (
-            <p className="mt-4 text-sm text-slate-600">Waiting for the first signal from Raspberry Pi devices.</p>
+            <div className="mt-16 flex flex-col items-center text-center">
+              <Radar className="size-24 text-slate-600" />
+              <p className="mt-8 text-2xl text-slate-300">Waiting for the first signal from Raspberry Pi devices</p>
+            </div>
           )}
         </aside>
       </section>
 
-      <div className="mt-8">
+      <div className="mt-6">
         <AlertsTable alerts={alerts} />
       </div>
     </main>
