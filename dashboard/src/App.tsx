@@ -6,6 +6,7 @@ import { useAlerts } from '@/lib/useAlerts'
 
 function App() {
   const { alerts, heartbeatSeries, connected, telemetry } = useAlerts()
+  const heartSensorEnabled = telemetry?.isHeartSensorEnabled !== false
 
   const latest = alerts[0]
   const latestBpm = telemetry?.heartbeatBpm ?? heartbeatSeries[heartbeatSeries.length - 1]?.bpm ?? 0
@@ -81,7 +82,7 @@ function App() {
       </section>
 
       <section className="mt-6 grid gap-6 lg:grid-cols-[1.6fr,0.8fr]">
-        <HeartbeatChart points={heartbeatSeries} />
+        <HeartbeatChart points={heartbeatSeries} sensorEnabled={heartSensorEnabled} />
 
         <aside className="rounded-xl border border-sky-500/20 bg-[#081a3b] p-6 shadow-md shadow-black/30">
           <h2 className="flex items-center gap-2 text-2xl font-semibold tracking-tight text-cyan-300 sm:text-4xl">

@@ -55,6 +55,18 @@ export function useAlerts() {
 
         const data = snapshot.data() as LiveTelemetry
         setTelemetry(data)
+
+        if (data.isHeartSensorEnabled === false) {
+          setTelemetryHistory([])
+          setTelemetryStreamOnline(true)
+          return
+        }
+
+        if (typeof data.heartbeatBpm !== 'number' || data.heartbeatBpm <= 0) {
+          setTelemetryStreamOnline(true)
+          return
+        }
+
         setTelemetryHistory((prev) => {
           const nextPoint: HeartbeatPoint = {
             timestamp: data.updatedAt,
@@ -89,6 +101,10 @@ export function useAlerts() {
   }, [alertStreamOnline, telemetry, telemetryStreamOnline])
 
   const heartbeatSeries = useMemo<HeartbeatPoint[]>(() => {
+    if (telemetry?.isHeartSensorEnabled === false) {
+      return []
+    }
+
     if (telemetryHistory.length > 0) {
       return telemetryHistory
     }
@@ -113,7 +129,7 @@ export function useAlerts() {
       bpm,
       source: 'simulated' as const,
     }))
-  }, [alerts, telemetryHistory])
+  }, [alerts, telemetry, telemetryHistory])
 
   return { alerts, heartbeatSeries, connected, telemetry }
 }
