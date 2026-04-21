@@ -1,4 +1,4 @@
-import { AudioLines, FileText, HeartPulse, Radar, Siren, WifiOff } from 'lucide-react'
+import { AudioLines, FileText, HeartPulse, Radar, Siren, Wifi, WifiOff } from 'lucide-react'
 import { AlertsTable } from '@/components/alerts-table'
 import { HeartbeatChart } from '@/components/heartbeat-chart'
 import { Card, CardContent } from '@/components/ui/card'
@@ -32,11 +32,13 @@ function App() {
             <CardContent className="p-5">
               <div className="flex items-start justify-between">
                 <p className="text-sm uppercase tracking-wider text-slate-400">Connection Status</p>
-                <WifiOff className="size-8 text-rose-400" />
+                {connected ? <Wifi className="size-8 text-emerald-400" /> : <WifiOff className="size-8 text-rose-400" />}
               </div>
-              <p className="mt-2 text-4xl font-semibold text-rose-400">{connected ? 'Online' : 'Offline'}</p>
-              <p className="mt-2 flex items-center gap-2 text-base text-rose-300">
-                <span className="size-2 rounded-full bg-rose-400" />
+              <p className={`mt-2 text-4xl font-semibold ${connected ? 'text-emerald-400' : 'text-rose-400'}`}>
+                {connected ? 'Online' : 'Offline'}
+              </p>
+              <p className={`mt-2 flex items-center gap-2 text-base ${connected ? 'text-emerald-300' : 'text-rose-300'}`}>
+                <span className={`size-2 rounded-full ${connected ? 'bg-emerald-400' : 'bg-rose-400'}`} />
                 {connected ? 'Connected to Firebase' : 'Awaiting Connection'}
               </p>
             </CardContent>

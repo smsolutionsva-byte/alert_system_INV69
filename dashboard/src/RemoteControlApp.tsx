@@ -3,7 +3,7 @@ import { addDoc, collection, doc, setDoc } from 'firebase/firestore'
 import { BellRing, HeartPulse, Mic, Wifi, WifiOff } from 'lucide-react'
 import { db } from '@/lib/firebase'
 
-const DEVICE_ID = 'remote-simulator-01'
+const DEVICE_ID = 'remote-controller-01'
 
 // Reference anchors:
 // - Resting heart rate for adults is commonly 60-100 bpm (AHA).
@@ -33,7 +33,7 @@ export function RemoteControlApp() {
   const [isEmergencyMode, setIsEmergencyMode] = useState(false)
   const [soundHoldActive, setSoundHoldActive] = useState(false)
   const [heartBoost, setHeartBoost] = useState(0)
-  const [statusMessage, setStatusMessage] = useState('Simulator is offline. Turn Device Online ON.')
+  const [statusMessage, setStatusMessage] = useState('Device is offline. Turn Device Online ON.')
   const [sendError, setSendError] = useState<string | null>(null)
 
   const lastSoundAlertAt = useRef(0)
@@ -52,7 +52,7 @@ export function RemoteControlApp() {
 
   const connectionHint = useMemo(() => {
     if (sendError) {
-      return 'Write failed. Check Firestore rules for simulator writes.'
+      return 'Write failed. Check Firestore rules for remote writes.'
     }
     return 'Live writes are enabled to Firestore telemetry/live.'
   }, [sendError])
@@ -167,7 +167,7 @@ export function RemoteControlApp() {
 
     if (next) {
       setHeartBoost((prev) => Math.min(prev + 16, 52))
-      void pushAlert('manual', 'Emergency mode activated from remote simulator.').catch((error: unknown) => {
+      void pushAlert('manual', 'Emergency mode activated from remote controller.').catch((error: unknown) => {
         setSendError(String(error))
       })
       setStatusMessage('Emergency mode ON. Alert pushed.')
@@ -281,14 +281,14 @@ export function RemoteControlApp() {
 
       if (heartSensorEnabled && nextHeartbeat >= 116 && now - lastHeartbeatAlertAt.current > 25000) {
         lastHeartbeatAlertAt.current = now
-        void pushAlert('heartbeat', 'Elevated heartbeat pattern observed in simulator.').catch((error: unknown) => {
+        void pushAlert('heartbeat', 'Elevated heartbeat pattern observed.').catch((error: unknown) => {
           setSendError(String(error))
         })
       }
 
       if (soundSensorEnabled && soundHeld && nextSound >= 72 && now - lastSoundAlertAt.current > 18000) {
         lastSoundAlertAt.current = now
-        void pushAlert('sound', 'High-risk sound intensity detected in simulator.').catch((error: unknown) => {
+        void pushAlert('sound', 'High-risk sound intensity detected.').catch((error: unknown) => {
           setSendError(String(error))
         })
       }
@@ -334,7 +334,7 @@ export function RemoteControlApp() {
   return (
     <main className="mx-auto min-h-screen w-full max-w-3xl px-4 py-6 text-slate-100 sm:px-6">
       <section className="rounded-2xl border border-cyan-500/25 bg-[#071935]/85 p-5 shadow-[0_24px_60px_rgba(1,8,24,0.75)] backdrop-blur">
-        <h1 className="text-2xl font-semibold text-cyan-300 sm:text-3xl">INV69 Remote Sensor Simulator</h1>
+        <h1 className="text-2xl font-semibold text-cyan-300 sm:text-3xl">INV69 Remote Sensor Control</h1>
         <p className="mt-2 text-sm text-slate-300">
           Open this page from mobile to simulate Raspberry Pi sensor values remotely.
         </p>
