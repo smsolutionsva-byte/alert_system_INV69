@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 218 38% 97%;
+    --foreground: 221 39% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 221 39% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 221 39% 11%;
+    --primary: 350 84% 46%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 216 34% 92%;
+    --secondary-foreground: 221 39% 11%;
+    --muted: 220 26% 93%;
+    --muted-foreground: 221 17% 35%;
+    --accent: 214 32% 90%;
+    --accent-foreground: 221 39% 11%;
+    --destructive: 350 84% 46%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 27% 86%;
+    --input: 220 27% 86%;
+    --ring: 350 84% 46%;
+    --radius: 1rem;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply min-h-screen bg-background text-foreground antialiased;
+    font-family: 'IBM Plex Sans', sans-serif;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(239, 68, 68, 0.15), transparent 45%),
+      radial-gradient(circle at 85% 8%, rgba(14, 116, 144, 0.2), transparent 32%),
+      linear-gradient(140deg, #f8fafc 0%, #eef2ff 35%, #f9fafb 100%);
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: 'Space Grotesk', sans-serif;
+  }
+
+  #root {
+    @apply min-h-screen;
+  }
+}
