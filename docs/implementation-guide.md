@@ -112,3 +112,16 @@ The Python service includes:
 2. Dashboard listens with Firestore `onSnapshot` and updates immediately.
 3. Responder/admin updates `complaintStatus`.
 4. Dashboard table reflects lifecycle: `new`, `in_progress`, `closed`.
+
+## 8) Remote Simulator Workflow (When Pi Is Not Available)
+
+1. Apply **Demo Rules** from `docs/firebase-security-rules.md`.
+2. Deploy dashboard to Vercel.
+3. Open remote controller URL on phone/laptop:
+	- `https://<your-domain>/remote.html`
+4. Use three buttons:
+	- Emergency Mode
+	- Heart Pulse
+	- Hold for Sound
+5. Confirm `telemetry/live` and `alerts` update in Firestore.
+6. Open dashboard URL and verify real-time metric + chart updates.

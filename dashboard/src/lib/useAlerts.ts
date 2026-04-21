@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import {
   collection,
+  doc,
   limit,
   onSnapshot,
   orderBy,
@@ -8,7 +9,7 @@ import {
   type QueryDocumentSnapshot,
 } from 'firebase/firestore'
 import { db } from '@/lib/firebase'
-import type { AlertEvent, HeartbeatPoint } from '@/lib/types'
+import type { AlertEvent, HeartbeatPoint, LiveTelemetry } from '@/lib/types'
 
 const SAMPLE_BPM = [72, 76, 81, 79, 84, 93, 90, 86, 95, 88, 83, 79, 76, 72]
 
@@ -22,7 +23,11 @@ function mapAlertDoc(doc: QueryDocumentSnapshot): AlertEvent {
 
 export function useAlerts() {
   const [alerts, setAlerts] = useState<AlertEvent[]>([])
+  const [telemetry, setTelemetry] = useState<LiveTelemetry | null>(null)
   const [connected, setConnected] = useState(false)
+  const [telemetryHistory, setTelemetryHistory] = useState<HeartbeatPoint[]>([])
+  const [alertStreamOnline, setAlertStreamOnline] = useState(false)
+  const [telemetryStreamOnline, setTelemetryStreamOnline] = useState(false)
 
   useEffect(() => {
     const alertRef = collection(db, 'alerts')
@@ -32,17 +37,57 @@ export function useAlerts() {
       alertQuery,
       (snapshot) => {
         setAlerts(snapshot.docs.map(mapAlertDoc))
-        setConnected(true)
+        setAlertStreamOnline(true)
       },
       () => {
-        setConnected(false)
+        setAlertStreamOnline(false)
       },
     )
 
-    return () => stop()
+    const telemetryRef = doc(db, 'telemetry', 'live')
+    const stopTelemetry = onSnapshot(
+      telemetryRef,
+      (snapshot) => {
+        if (!snapshot.exists()) {
+          setTelemetryStreamOnline(true)
+          return
+        }
+
+        const data = snapshot.data() as LiveTelemetry
+        setTelemetry(data)
+        setTelemetryHistory((prev) => {
+          const nextPoint: HeartbeatPoint = {
+            timestamp: data.updatedAt,
+            bpm: data.heartbeatBpm,
+            source: 'live',
+          }
+
+          const deduped = prev.filter((item) => item.timestamp !== nextPoint.timestamp)
+          const next = [...deduped, nextPoint]
+          return next.slice(-80)
+        })
+        setTelemetryStreamOnline(true)
+      },
+      () => {
+        setTelemetryStreamOnline(false)
+      },
+    )
+
+    return () => {
+      stop()
+      stopTelemetry()
+    }
   }, [])
 
+  useEffect(() => {
+    setConnected(alertStreamOnline || telemetryStreamOnline)
+  }, [alertStreamOnline, telemetryStreamOnline])
+
   const heartbeatSeries = useMemo<HeartbeatPoint[]>(() => {
+    if (telemetryHistory.length > 0) {
+      return telemetryHistory
+    }
+
     const pointsFromAlerts = alerts
       .filter((event) => typeof event.heartbeatBpm === 'number')
       .slice()
@@ -63,7 +108,7 @@ export function useAlerts() {
       bpm,
       source: 'simulated' as const,
     }))
-  }, [alerts])
+  }, [alerts, telemetryHistory])
 
-  return { alerts, heartbeatSeries, connected }
+  return { alerts, heartbeatSeries, connected, telemetry }
 }

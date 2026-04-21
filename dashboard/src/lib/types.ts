@@ -17,3 +17,13 @@ export interface AlertEvent {
   soundLevel: number | null
   resolvedAt?: number | null
 }
+
+export interface LiveTelemetry {
+  updatedAt: number
+  updatedAtIso: string
+  deviceId: string
+  source: 'pi-hardware' | 'remote-simulator'
+  heartbeatBpm: number
+  soundDb: number
+  isEmergencyMode: boolean
+}

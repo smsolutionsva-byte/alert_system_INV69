@@ -11,6 +11,39 @@
 
 ## Firestore Rules
 
+## Demo Rules (for Remote Simulator + Dashboard Without Auth)
+
+Use this only for development/testing while you do not have Raspberry Pi hardware online.
+
+```txt
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /alerts/{alertId} {
+      allow read: if true;
+      allow create: if
+        request.resource.data.createdAt is int &&
+        request.resource.data.deviceId is string &&
+        request.resource.data.alertType is string &&
+        request.resource.data.message is string &&
+        request.resource.data.complaintStatus is string;
+      allow update, delete: if false;
+    }
+
+    match /telemetry/live {
+      allow read: if true;
+      allow write: if
+        request.resource.data.updatedAt is int &&
+        request.resource.data.deviceId is string &&
+        request.resource.data.heartbeatBpm is int &&
+        request.resource.data.soundDb is int;
+    }
+  }
+}
+```
+
+## Production Rules (Auth + Role Based)
+
 ```txt
 rules_version = '2';
 service cloud.firestore {

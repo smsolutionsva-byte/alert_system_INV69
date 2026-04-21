@@ -5,11 +5,11 @@ import { Card, CardContent } from '@/components/ui/card'
 import { useAlerts } from '@/lib/useAlerts'
 
 function App() {
-  const { alerts, heartbeatSeries, connected } = useAlerts()
+  const { alerts, heartbeatSeries, connected, telemetry } = useAlerts()
 
   const latest = alerts[0]
-  const latestBpm = heartbeatSeries[heartbeatSeries.length - 1]?.bpm ?? 0
-  const latestSound = latest?.soundLevel ?? 0
+  const latestBpm = telemetry?.heartbeatBpm ?? heartbeatSeries[heartbeatSeries.length - 1]?.bpm ?? 0
+  const latestSound = telemetry?.soundDb ?? latest?.soundLevel ?? 0
   const openComplaints = alerts.filter((item) => item.complaintStatus !== 'closed').length
 
   return (
@@ -62,7 +62,7 @@ function App() {
                 <p className="text-sm uppercase tracking-wider text-slate-400">Sound Level</p>
                 <AudioLines className="size-8 text-cyan-300" />
               </div>
-              <p className="mt-2 text-4xl font-semibold text-cyan-300">{latestSound} dB</p>
+              <p className="mt-2 text-4xl font-semibold text-cyan-300">{Math.round(latestSound)} dB</p>
             </CardContent>
           </Card>
 

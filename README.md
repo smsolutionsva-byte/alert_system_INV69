@@ -25,6 +25,25 @@ npm install
 npm run dev
 ```
 
+## 2.1) Remote Simulator Page (No Pi Hardware Needed)
+
+This project ships with an external-style simulator page that can be opened on mobile and used to send realistic sensor data into Firestore.
+
+Local URL:
+- `http://localhost:5173/remote.html`
+
+Production URL (after Vercel deploy):
+- `https://<your-domain>/remote.html`
+
+Remote buttons:
+- `Emergency Mode`: pushes manual emergency alert.
+- `Heart Pulse`: adds realistic short heart-rate spikes.
+- `Hold for Sound`: increases dB while pressed, returns to ambient when released.
+
+The page writes:
+- `telemetry/live` document for live heartbeat + sound values.
+- `alerts` documents for emergency/sound/heartbeat events.
+
 ### Optional shadcn/ui init (after alias + tailwind config already in repo)
 
 ```powershell
