@@ -8,57 +8,12 @@ import { Card, CardContent } from '@/components/ui/card'
 import { auth, googleProvider } from '@/lib/firebase'
 import { useAlerts } from '@/lib/useAlerts'
 
-function App() {
-  const [user, setUser] = useState<User | null>(null)
-  const [authLoading, setAuthLoading] = useState(true)
-  const [signingIn, setSigningIn] = useState(false)
-  const [authError, setAuthError] = useState<string | null>(null)
+interface DashboardShellProps {
+  user: User
+  onSignOut: () => Promise<void>
+}
 
-  useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
-      setUser(nextUser)
-      setAuthLoading(false)
-    })
-
-    return () => unsubscribe()
-  }, [])
-
-  async function handleGoogleLogin(): Promise<void> {
-    setSigningIn(true)
-    setAuthError(null)
-
-    try {
-      await signInWithPopup(auth, googleProvider)
-    } catch (error) {
-      const code = (error as { code?: string })?.code
-
-      if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') {
-        await signInWithRedirect(auth, googleProvider)
-        return
-      }
-
-      setAuthError('Google sign-in failed. Please try again.')
-    } finally {
-      setSigningIn(false)
-    }
-  }
-
-  async function handleSignOut(): Promise<void> {
-    await signOut(auth)
-  }
-
-  if (authLoading) {
-    return (
-      <main className="mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center px-4 py-10 text-slate-200">
-        Checking secure session...
-      </main>
-    )
-  }
-
-  if (!user) {
-    return <LoginPage loading={signingIn} error={authError} onGoogleLogin={handleGoogleLogin} />
-  }
-
+function DashboardShell({ user, onSignOut }: DashboardShellProps) {
   const { alerts, heartbeatSeries, connected, telemetry } = useAlerts()
   const heartSensorEnabled = telemetry?.isHeartSensorEnabled !== false
 
@@ -74,7 +29,7 @@ function App() {
           <span className="rounded-full border border-cyan-400/35 bg-cyan-500/10 px-3 py-1">{user.email ?? 'Authenticated User'}</span>
           <button
             type="button"
-            onClick={handleSignOut}
+            onClick={onSignOut}
             className="rounded-full border border-rose-400/40 bg-rose-500/20 px-3 py-1 font-medium text-rose-100 transition hover:bg-rose-500/35"
           >
             Sign Out
@@ -182,6 +137,60 @@ function App() {
       </div>
     </main>
   )
+}
+
+function App() {
+  const [user, setUser] = useState<User | null>(null)
+  const [authLoading, setAuthLoading] = useState(true)
+  const [signingIn, setSigningIn] = useState(false)
+  const [authError, setAuthError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
+      setUser(nextUser)
+      setAuthLoading(false)
+    })
+
+    return () => unsubscribe()
+  }, [])
+
+  async function handleGoogleLogin(): Promise<void> {
+    setSigningIn(true)
+    setAuthError(null)
+
+    try {
+      await signInWithPopup(auth, googleProvider)
+    } catch (error) {
+      const code = (error as { code?: string })?.code
+
+      if (code === 'auth/popup-blocked' || code === 'auth/cancelled-popup-request') {
+        await signInWithRedirect(auth, googleProvider)
+        return
+      }
+
+      setAuthError('Google sign-in failed. Please try again.')
+    } finally {
+      setSigningIn(false)
+    }
+  }
+
+  async function handleSignOut(): Promise<void> {
+    await signOut(auth)
+  }
+
+  if (authLoading) {
+    return (
+      <main className="mx-auto flex min-h-screen w-full max-w-4xl items-center justify-center px-4 py-10 text-slate-200">
+        Checking secure session...
+      </main>
+    )
+  }
+
+  if (!user) {
+    return <LoginPage loading={signingIn} error={authError} onGoogleLogin={handleGoogleLogin} />
+  }
+
+  return <DashboardShell user={user} onSignOut={handleSignOut} />
 }
 
 export default App
