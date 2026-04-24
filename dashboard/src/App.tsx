@@ -8,6 +8,15 @@ import { Card, CardContent } from '@/components/ui/card'
 import { auth, googleProvider } from '@/lib/firebase'
 import { useAlerts } from '@/lib/useAlerts'
 
+function shouldUseRedirectAuth(): boolean {
+  const ua = navigator.userAgent || ''
+  const isAndroidWebView = /\bwv\b|; wv\)/i.test(ua)
+  const isIosWebView = /iPhone|iPad|iPod/i.test(ua) && /AppleWebKit(?!.*Safari)/i.test(ua)
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(ua)
+
+  return isAndroidWebView || isIosWebView || isMobile
+}
+
 interface DashboardShellProps {
   user: User
   onSignOut: () => Promise<void>
@@ -159,6 +168,11 @@ function App() {
     setAuthError(null)
 
     try {
+      if (shouldUseRedirectAuth()) {
+        await signInWithRedirect(auth, googleProvider)
+        return
+      }
+
       await signInWithPopup(auth, googleProvider)
     } catch (error) {
       const code = (error as { code?: string })?.code
@@ -168,7 +182,7 @@ function App() {
         return
       }
 
-      setAuthError('Google sign-in failed. Please try again.')
+      setAuthError('Google sign-in failed. Please try again from a secure browser session.')
     } finally {
       setSigningIn(false)
     }
