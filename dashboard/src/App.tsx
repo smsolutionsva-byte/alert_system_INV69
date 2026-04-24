@@ -12,9 +12,9 @@ function shouldUseRedirectAuth(): boolean {
   const ua = navigator.userAgent || ''
   const isAndroidWebView = /\bwv\b|; wv\)/i.test(ua)
   const isIosWebView = /iPhone|iPad|iPod/i.test(ua) && /AppleWebKit(?!.*Safari)/i.test(ua)
-  const isMobile = /Android|iPhone|iPad|iPod/i.test(ua)
 
-  return isAndroidWebView || isIosWebView || isMobile
+  // Redirect auth is reserved for embedded webviews where popup flows are unreliable.
+  return isAndroidWebView || isIosWebView
 }
 
 interface DashboardShellProps {
