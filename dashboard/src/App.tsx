@@ -18,8 +18,8 @@ function shouldUseRedirectAuth(): boolean {
 }
 
 interface DashboardShellProps {
-  user: User
-  onSignOut: () => Promise<void>
+  user: User | null
+  onSignOut?: () => Promise<void>
 }
 
 function DashboardShell({ user, onSignOut }: DashboardShellProps) {
@@ -35,14 +35,16 @@ function DashboardShell({ user, onSignOut }: DashboardShellProps) {
     <main className="mx-auto w-full max-w-[1400px] px-4 py-6 sm:px-6 lg:px-8">
       <section className="rounded-2xl border border-cyan-500/20 bg-[#051733]/70 p-5 shadow-[0_24px_70px_rgba(0,8,28,0.7)] backdrop-blur-xl sm:p-6">
         <div className="mb-5 flex flex-wrap items-center justify-end gap-2 text-sm text-slate-300">
-          <span className="rounded-full border border-cyan-400/35 bg-cyan-500/10 px-3 py-1">{user.email ?? 'Authenticated User'}</span>
-          <button
-            type="button"
-            onClick={onSignOut}
-            className="rounded-full border border-rose-400/40 bg-rose-500/20 px-3 py-1 font-medium text-rose-100 transition hover:bg-rose-500/35"
-          >
-            Sign Out
-          </button>
+          <span className="rounded-full border border-cyan-400/35 bg-cyan-500/10 px-3 py-1">{user?.email ?? 'Mobile Demo Mode'}</span>
+          {onSignOut ? (
+            <button
+              type="button"
+              onClick={onSignOut}
+              className="rounded-full border border-rose-400/40 bg-rose-500/20 px-3 py-1 font-medium text-rose-100 transition hover:bg-rose-500/35"
+            >
+              Sign Out
+            </button>
+          ) : null}
         </div>
 
         <div className="flex items-start gap-3">
@@ -149,15 +151,18 @@ function DashboardShell({ user, onSignOut }: DashboardShellProps) {
 }
 
 function App() {
+  const [bypassAuth] = useState(() => {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('mobile') === '1'
+  })
   const [user, setUser] = useState<User | null>(null)
-  const [authLoading, setAuthLoading] = useState(true)
+  const [authLoading, setAuthLoading] = useState(!bypassAuth)
   const [signingIn, setSigningIn] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
   const [stayInBrowser, setStayInBrowser] = useState(false)
   const [autoReturnTriggered, setAutoReturnTriggered] = useState(false)
   const [isMobileReturnFlow] = useState(() => {
-    const params = new URLSearchParams(window.location.search)
-    return params.get('mobile') === '1'
+    return false
   })
   const [returnToAppUrl] = useState(() => {
     const params = new URLSearchParams(window.location.search)
@@ -179,13 +184,18 @@ function App() {
   }, [autoReturnTriggered, isMobileReturnFlow, returnToAppUrl, stayInBrowser, user])
 
   useEffect(() => {
+    if (bypassAuth) {
+      setAuthLoading(false)
+      return
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
       setUser(nextUser)
       setAuthLoading(false)
     })
 
     return () => unsubscribe()
-  }, [])
+  }, [bypassAuth])
 
   async function handleGoogleLogin(): Promise<void> {
     setSigningIn(true)
@@ -224,7 +234,7 @@ function App() {
     )
   }
 
-  if (!user) {
+  if (!user && !bypassAuth) {
     return <LoginPage loading={signingIn} error={authError} onGoogleLogin={handleGoogleLogin} />
   }
 
@@ -262,7 +272,7 @@ function App() {
     )
   }
 
-  return <DashboardShell user={user} onSignOut={handleSignOut} />
+  return <DashboardShell user={user} onSignOut={bypassAuth ? undefined : handleSignOut} />
 }
 
 export default App
