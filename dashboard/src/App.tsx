@@ -153,6 +153,30 @@ function App() {
   const [authLoading, setAuthLoading] = useState(true)
   const [signingIn, setSigningIn] = useState(false)
   const [authError, setAuthError] = useState<string | null>(null)
+  const [stayInBrowser, setStayInBrowser] = useState(false)
+  const [autoReturnTriggered, setAutoReturnTriggered] = useState(false)
+  const [isMobileReturnFlow] = useState(() => {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('mobile') === '1'
+  })
+  const [returnToAppUrl] = useState(() => {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('app') || 'inv69app://auth-complete'
+  })
+
+  useEffect(() => {
+    if (!user || !isMobileReturnFlow || stayInBrowser || autoReturnTriggered) {
+      return
+    }
+
+    setAutoReturnTriggered(true)
+
+    const timer = window.setTimeout(() => {
+      window.location.href = returnToAppUrl
+    }, 450)
+
+    return () => window.clearTimeout(timer)
+  }, [autoReturnTriggered, isMobileReturnFlow, returnToAppUrl, stayInBrowser, user])
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (nextUser) => {
@@ -202,6 +226,40 @@ function App() {
 
   if (!user) {
     return <LoginPage loading={signingIn} error={authError} onGoogleLogin={handleGoogleLogin} />
+  }
+
+  if (isMobileReturnFlow && !stayInBrowser) {
+    return (
+      <main className="mx-auto flex min-h-screen w-full max-w-xl items-center justify-center px-4 py-10 sm:px-6">
+        <section className="w-full rounded-2xl border border-cyan-500/25 bg-[#071935]/85 p-7 text-center shadow-[0_24px_60px_rgba(1,8,24,0.75)] backdrop-blur">
+          <h1 className="text-2xl font-semibold text-cyan-300">Login Successful</h1>
+          <p className="mt-2 text-slate-300">Returning to your app. If it does not open automatically, tap the button below.</p>
+
+          <div className="mt-6 flex flex-col items-stretch gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                window.location.href = returnToAppUrl
+              }}
+              className="min-h-11 rounded-xl border border-cyan-400/45 bg-cyan-500/20 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-500/35"
+            >
+              Open App
+            </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setStayInBrowser(true)
+                window.history.replaceState({}, document.title, window.location.pathname)
+              }}
+              className="min-h-11 rounded-xl border border-slate-500/45 bg-slate-600/20 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:bg-slate-600/35"
+            >
+              Continue In Browser
+            </button>
+          </div>
+        </section>
+      </main>
+    )
   }
 
   return <DashboardShell user={user} onSignOut={handleSignOut} />
